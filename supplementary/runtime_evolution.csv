@@ -1,0 +1,5 @@
+configuration,wall_time_s,per_case_s
+Pre-study baseline (v3 K=3),6728,67.2
+E1: Re-rank fixed,5552,55.4
+E1+E4: Re-rank + tiered K=2,4745,47.4
+E4' Tiered K(n) = 3/2/1,4112,41.1

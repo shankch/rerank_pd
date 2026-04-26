@@ -1,0 +1,10 @@
+# Core
+torch>=2.0,<2.6
+numpy>=1.24
+tqdm>=4.65
+
+# For shapely-backed polygon overlap checks used by the contest evaluator
+shapely>=2.0
+
+# Used by the FloorSet dataset loaders (streaming download of tarballs)
+requests>=2.30

@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Build artefacts
+build/
+dist/
+
+# Logs and intermediate outputs
+*.log
+*.out
+*.aux
+*.bbl
+*.blg
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.run.xml
+*.bcf
+paper/_minted-*
+paper/*.pdf.orig
+
+# Dataset (never commit -- download via FloorSet repo)
+FloorSet/
+LiteTensorData/
+LiteTensorDataTest/
+PrimeTensorData/
+PrimeTensorDataTest/
+*.tar.gz
+*.tgz
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Large intermediate checkpoints not needed for reproduction
+# (local overrides may still be placed under checkpoints/ if desired)
+checkpoints/*_step*.pt
+checkpoints/*_v1_*.pt
+checkpoints/*_v2_*.pt
+checkpoints/*_v4*.pt
+checkpoints/*_bak*.pt
+checkpoints/*_stash*.pt

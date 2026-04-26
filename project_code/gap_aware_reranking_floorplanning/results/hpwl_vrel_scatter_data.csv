@@ -1,0 +1,14 @@
+candidate_family,v_rel,hpwl_gap_relative_to_min
+DiT-abacus-cluster,0.308,-0.308
+DiT-abacus-cluster,0.418,-0.225
+DiT-abacus-cluster,0.367,-0.178
+DiT-abacus-cluster,0.392,-0.266
+DiT-abacus-cluster,0.405,-0.188
+DiT-abacus-cluster,0.430,-0.011
+DiT-abacus-cluster,0.278,-0.033
+DiT-abacus-cluster,0.269,0.001
+shelf-NN-skyline,0.190,0.000
+shelf-NN-skyline,0.190,0.031
+shelf-NN-skyline,0.215,0.031
+shelf-NN-skyline,0.231,0.062
+shelf-NN-skyline,0.231,0.014

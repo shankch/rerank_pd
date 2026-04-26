@@ -1,0 +1,10 @@
+intervention,S_100,delta_S_100,status,notes
+Baseline (pre-study),1.43,,-,raw-magnitude ranking cost
+E1: Candidate reranking,1.40228,-0.028,Kept,30th-percentile gap baseline
+E2: DiT-abacus,1.40228,0.000,Kept,row-based abacus with DiT shapes
+E3: Cluster-aware DiT,1.40228,0.000,Kept,super-block per cluster
+E4: Tiered DiT sampling,1.40228,0.000,Kept,K(n)=3/2/1 by size
+E5: DiT v4b (larger + HPWL aux loss),1.598,+0.196,Reverted,14% regression
+E6: Unbounded DREAMPlace,1.797,+0.395,Reverted,28% regression
+E7: Cluster-compact fix,1.405,+0.003,Reverted,introduces boundary violations
+E8: DiT-shape skyline,--,0.000,Disabled,contributes to E6 regression
