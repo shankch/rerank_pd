@@ -5,7 +5,7 @@ capsule.
 
 The top-level capsule entry points live in:
 
-- `../../code/run_capsule.py` for the default inference-only run
+- `../../code/main.py` for the default inference-only run
 - `../../code/train.py` for optional retraining from scratch
 
 ## Checkpoint layout

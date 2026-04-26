@@ -14,7 +14,7 @@ From the capsule root:
 
 ```bash
 pip install -r requirements.txt
-python code/run_capsule.py
+python code/main.py
 ```
 
 What the main run does:
@@ -23,9 +23,9 @@ What the main run does:
   `data/checkpoints/`
 - runs a short inference-only verification pass on FloorSet-Lite and
   FloorSet-Prime
-- copies the released paper CSV tables into `results/codeocean_run/`
+- copies the released paper CSV tables into `/results/codeocean_run/`
 - regenerates lightweight figures from the saved CSV traces
-- writes a summary report in `results/codeocean_run/run_summary.md`
+- writes a summary report in `/results/codeocean_run/run_summary.md`
 
 The main run is intended to finish in minutes, not hours.
 
@@ -81,7 +81,8 @@ Checksums are listed in `data/checkpoints/SHA256SUMS.txt`.
 
 Generated outputs are written to:
 
-`results/codeocean_run/`
+`/results/codeocean_run/` inside Code Ocean, with a local fallback to
+`results/codeocean_run/` when `/results` is not mounted.
 
 This directory is ignored by git so local reruns do not dirty the
 artifact.
