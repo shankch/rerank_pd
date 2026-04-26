@@ -12,10 +12,43 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+THIS_DIR = Path(__file__).resolve().parent
+
+
+def _resolve_code_root() -> Path:
+    env_root = os.environ.get("CODE_ROOT")
+    candidates = []
+    if env_root:
+        candidates.append(Path(env_root))
+    candidates.extend([
+        THIS_DIR.parent,  # local repo layout
+        THIS_DIR,         # Code Ocean layout
+        Path.cwd(),
+        Path.cwd().parent,
+    ])
+    rel = Path("project_code") / "gap_aware_reranking_floorplanning"
+    for candidate in candidates:
+        if (candidate / rel).exists():
+            return candidate
+    raise FileNotFoundError(
+        "Could not locate project_code/gap_aware_reranking_floorplanning relative "
+        f"to {THIS_DIR} or the current working directory."
+    )
+
+
+ROOT = _resolve_code_root()
 PROJECT_ROOT = ROOT / "project_code" / "gap_aware_reranking_floorplanning"
 SRC_DIR = PROJECT_ROOT / "src"
-DEFAULT_CHECKPOINT_DIR = ROOT / "data" / "checkpoints"
+
+
+def _default_checkpoint_dir() -> Path:
+    codeocean_results = Path("/results/checkpoints")
+    if os.name != "nt" and codeocean_results.parent.exists():
+        return codeocean_results
+    return ROOT / "data" / "checkpoints"
+
+
+DEFAULT_CHECKPOINT_DIR = _default_checkpoint_dir()
 
 TRAIN_TARGETS = {
     "nn-hint": {

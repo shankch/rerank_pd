@@ -27,9 +27,45 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import torch
 
-ROOT = Path(__file__).resolve().parent.parent
+THIS_DIR = Path(__file__).resolve().parent
+
+
+def _resolve_code_root() -> Path:
+    env_root = os.environ.get("CODE_ROOT")
+    candidates = []
+    if env_root:
+        candidates.append(Path(env_root))
+    candidates.extend([
+        THIS_DIR.parent,  # local repo layout: submission_final/code/main.py
+        THIS_DIR,         # Code Ocean layout: /code/main.py
+        Path.cwd(),
+        Path.cwd().parent,
+    ])
+    rel = Path("project_code") / "gap_aware_reranking_floorplanning"
+    for candidate in candidates:
+        if (candidate / rel).exists():
+            return candidate
+    raise FileNotFoundError(
+        "Could not locate project_code/gap_aware_reranking_floorplanning relative "
+        f"to {THIS_DIR} or the current working directory."
+    )
+
+
+ROOT = _resolve_code_root()
 PROJECT_ROOT = ROOT / "project_code" / "gap_aware_reranking_floorplanning"
-CHECKPOINT_DIR = ROOT / "data" / "checkpoints"
+
+
+def _resolve_checkpoint_dir() -> Path:
+    env_ckpt = os.environ.get("CHECKPOINT_DIR")
+    if env_ckpt:
+        return Path(env_ckpt)
+    codeocean_data = Path("/data/checkpoints")
+    if os.name != "nt" and codeocean_data.exists():
+        return codeocean_data
+    return ROOT / "data" / "checkpoints"
+
+
+CHECKPOINT_DIR = _resolve_checkpoint_dir()
 
 
 def _resolve_results_root() -> Path:
@@ -68,6 +104,12 @@ def ensure_dirs() -> None:
 
 
 def verify_checkpoint(path: Path) -> dict:
+    prefix = path.read_bytes()[:128]
+    if prefix.startswith(b"version https://git-lfs.github.com/spec/v1"):
+        raise RuntimeError(
+            f"{path} looks like a Git LFS pointer file, not the real checkpoint binary. "
+            "Upload the actual .pt file as a Code Ocean data asset under /data/checkpoints/"
+        )
     obj = torch.load(path, map_location="cpu", weights_only=False)
     if not isinstance(obj, dict) or "model_state" not in obj:
         raise RuntimeError(f"Unexpected checkpoint format: {path}")
