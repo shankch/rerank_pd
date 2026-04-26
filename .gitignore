@@ -23,3 +23,7 @@ desktop.ini
 .idea/
 *.swp
 *~
+
+# Local generated outputs and external dataset clones
+/results/
+/FloorSet/

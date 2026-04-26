@@ -16,6 +16,7 @@ Training:
 from __future__ import annotations
 
 import math
+import random
 import sys
 import time
 import warnings
@@ -24,10 +25,13 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 warnings.filterwarnings("ignore")
 
 THIS_DIR = Path(__file__).parent.resolve()
+PACKAGE_ROOT = THIS_DIR.parent
+SUBMISSION_ROOT = PACKAGE_ROOT.parent.parent
 import os as _os
 _env = _os.environ.get("FLOORSET_ROOT")
 _candidates = ([Path(_env)] if _env else []) + [
@@ -49,6 +53,29 @@ from iccad2026_evaluate import get_training_dataloader  # noqa: E402
 MAX_BLOCKS = 120
 F_DIM = 12  # per-block feature count
 HIDDEN = 256
+TRAIN_SEED = 42
+
+
+def _set_global_seed(seed: int = TRAIN_SEED) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def _default_checkpoint_dir() -> Path:
+    ckpt_env = _os.environ.get("CHECKPOINT_DIR")
+    if ckpt_env:
+        path = Path(ckpt_env)
+    else:
+        capsule_dir = SUBMISSION_ROOT / "data" / "checkpoints"
+        path = capsule_dir if (SUBMISSION_ROOT / "code").exists() else PACKAGE_ROOT / "checkpoints"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 class BlockEncoder(nn.Module):
@@ -157,7 +184,9 @@ def build_features(batch):
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    _set_global_seed(TRAIN_SEED)
     print(f"Device: {device}", flush=True)
+    print(f"Fixed training seed: {TRAIN_SEED}", flush=True)
     print("Loading training dataloader (may download ~6 GB if first time)...", flush=True)
     num_train = 1000000
     batch_size = 32
@@ -171,7 +200,7 @@ def main():
 
     step = 0
     t0 = time.time()
-    ckpt_path = THIS_DIR / "nn_hint_ckpt.pt"
+    ckpt_path = _default_checkpoint_dir() / "nn_hint_ckpt.pt"
     try:
         for epoch in range(n_epochs):
             for batch in dl:

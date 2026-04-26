@@ -21,6 +21,7 @@ Based on DiT (Peebles & Xie 2022) adapted for variable-length set of blocks.
 from __future__ import annotations
 
 import math
+import random
 import sys
 import time
 import warnings
@@ -29,10 +30,13 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 warnings.filterwarnings("ignore")
 
 THIS_DIR = Path(__file__).parent.resolve()
+PACKAGE_ROOT = THIS_DIR.parent
+SUBMISSION_ROOT = PACKAGE_ROOT.parent.parent
 import os as _os
 _env = _os.environ.get("FLOORSET_ROOT")
 _candidates = ([Path(_env)] if _env else []) + [
@@ -55,6 +59,29 @@ D_MODEL = 384
 N_HEADS = 8
 N_LAYERS = 10
 N_TIMESTEPS = 100  # diffusion steps (both training and inference)
+TRAIN_SEED = 42
+
+
+def _set_global_seed(seed: int = TRAIN_SEED) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def _default_checkpoint_dir() -> Path:
+    ckpt_env = _os.environ.get("CHECKPOINT_DIR")
+    if ckpt_env:
+        path = Path(ckpt_env)
+    else:
+        capsule_dir = SUBMISSION_ROOT / "data" / "checkpoints"
+        path = capsule_dir if (SUBMISSION_ROOT / "code").exists() else PACKAGE_ROOT / "checkpoints"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def timestep_embedding(t: torch.Tensor, dim: int) -> torch.Tensor:
@@ -236,7 +263,9 @@ def build_features(batch, include_shape_targets: bool = True):
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    _set_global_seed(TRAIN_SEED)
     print(f"Device: {device}", flush=True)
+    print(f"Fixed training seed: {TRAIN_SEED}", flush=True)
     num_train = 1000000
     batch_size = 20
     dl = get_training_dataloader(batch_size=batch_size, num_samples=num_train)
@@ -259,7 +288,7 @@ def main():
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=total_steps, eta_min=1e-5)
 
     alphas, betas, alpha_bar = make_schedule(N_TIMESTEPS, device)
-    ckpt_path = THIS_DIR / "dit_base_ckpt.pt"
+    ckpt_path = _default_checkpoint_dir() / "dit_base_ckpt.pt"
 
     step = 0
     t0 = time.time()

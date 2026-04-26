@@ -1,77 +1,87 @@
-# Final Submission Package
+# Code Ocean Capsule Layout
 
-This folder contains the final paper bundle plus the single cleaned
-code path needed to reproduce the reported results.
+This folder is prepared as a Code Ocean style reproducibility capsule
+for the floorplanning paper.
 
-Older draft code, archive snapshots, and parallel legacy repos were
-removed on purpose so that a researcher can immediately find the
-relevant artifact.
+The default run is inference-only. It loads the released checkpoints
+from `data/checkpoints/`, runs a short verification evaluation, and
+recreates paper-facing tables and figures in `results/codeocean_run/`.
+It does not retrain models by default.
 
-## What To Use
+## Main run
 
-Use only:
-
-`project_code/gap_aware_reranking_floorplanning/`
-
-That package contains:
-
-- the final solver source
-- evaluation scripts for FloorSet-Lite and FloorSet-Prime
-- the result CSVs used in the paper
-- the ablation and sensitivity scripts
-- the detailed reproduction README
-
-The code-only repository layout expects model weights to be provided
-separately via:
-
-`models/`
-
-In the local full artifact bundle, this folder can contain the released
-checkpoints directly. In a public code-only GitHub mirror, it is kept as
-a placeholder with instructions, checksums, and filenames so the repo
-stays lightweight.
-
-## Package Layout
-
-- `paper.tex`, `paper.pdf`, `ieeeaccess.cls`, `IEEEtran.cls`, and the
-  logo assets are the final journal-submission paper files.
-- `supplementary/` contains the raw CSV tables and figure exports used
-  to support the manuscript.
-- `models/` contains the checkpoint manifest and placement
-  instructions. The actual `.pt` files may be hosted separately.
-- `project_code/gap_aware_reranking_floorplanning/` is the only code
-  package that should be used for reproduction.
-
-## Quick Reproduction Path
-
-1. Place the released checkpoint files into `models/` if you are using
-   the full local artifact, or download them separately if you are
-   using a code-only GitHub mirror.
-2. Change into
-   `project_code/gap_aware_reranking_floorplanning/`.
-3. Follow the detailed instructions in
-   `project_code/gap_aware_reranking_floorplanning/README.md`.
-4. Clone the public FloorSet dataset repository and set
-   `FLOORSET_ROOT` if your directory layout differs from the default.
-5. Run:
+From the capsule root:
 
 ```bash
-python evaluation/quick_eval.py --full
-python evaluation/quick_eval_prime.py --full
+pip install -r requirements.txt
+python code/run_capsule.py
 ```
 
-Expected headline metrics:
+What the main run does:
 
-- FloorSet-Lite: `S_100 = 1.40228`, `100/100` feasible
-- FloorSet-Prime: `S_100 = 1.54862`, `91/100` feasible
+- loads the released `DiT-base` and `NN-hint` checkpoints from
+  `data/checkpoints/`
+- runs a short inference-only verification pass on FloorSet-Lite and
+  FloorSet-Prime
+- copies the released paper CSV tables into `results/codeocean_run/`
+- regenerates lightweight figures from the saved CSV traces
+- writes a summary report in `results/codeocean_run/run_summary.md`
 
-## Notes
+The main run is intended to finish in minutes, not hours.
 
-- The solver searches for checkpoints in this order:
-  `CHECKPOINT_DIR`, package-local `checkpoints/`, top-level `models/`,
-  package-local `models/`, then `./models/`.
-- The top-level paper files are kept because this folder is both the
-  final submission bundle and the accompanying reproducibility package.
-- Public mirrors should describe this as an artifact accompanying a
-  manuscript under review, not as an IEEE Access publication unless the
-  paper has already been accepted.
+## Optional training
+
+Training is included for full reproduction from scratch, but it is not
+part of the default Code Ocean run:
+
+```bash
+python code/train.py --target nn-hint
+python code/train.py --target dit-base
+```
+
+Approximate training times on a single RTX 3090:
+
+- `NN-hint`: about 6 hours
+- `DiT-base`: about 11 hours
+- `DiT-large-hpwl`: longer and included only for the negative-result
+  analysis
+
+The training scripts use fixed random seeds and save checkpoints into
+`data/checkpoints/` by default. The released final-run checkpoints used
+by the main inference-only run are already provided there.
+
+## Capsule layout
+
+- `code/`
+  Main capsule entry points for evaluation and optional training
+- `data/checkpoints/`
+  Released checkpoints used by the default inference-only run
+- `project_code/gap_aware_reranking_floorplanning/`
+  Core solver, evaluation harnesses, training scripts, and released CSV
+  results
+- `supplementary/`
+  Figure exports and raw manuscript support files
+
+## Dataset note
+
+The solver expects the public FloorSet repository to be available either
+at `../FloorSet`, inside the project tree, or via the `FLOORSET_ROOT`
+environment variable. The helper scripts preserve that behavior.
+
+## Checkpoints
+
+The default capsule run expects:
+
+- `data/checkpoints/dit_base_ckpt.pt`
+- `data/checkpoints/nn_hint_ckpt.pt`
+
+Checksums are listed in `data/checkpoints/SHA256SUMS.txt`.
+
+## Outputs
+
+Generated outputs are written to:
+
+`results/codeocean_run/`
+
+This directory is ignored by git so local reruns do not dirty the
+artifact.

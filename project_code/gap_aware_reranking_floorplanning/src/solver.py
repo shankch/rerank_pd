@@ -50,16 +50,19 @@ _candidates = ([Path(_env_root)] if _env_root else []) + [
 FLOORSET_ROOT = next((p for p in _candidates if p.exists()), _candidates[0])
 CONTEST_DIR = FLOORSET_ROOT / "iccad2026contest"
 # Checkpoints: $CHECKPOINT_DIR, then the package-local checkpoints/
-# directory, then the top-level models/ directory used by the
-# submission_final artifact bundle.
+# directory, then the top-level data/checkpoints/ directory used by the
+# Code Ocean style artifact bundle. Older models/ paths are kept as a
+# backwards-compatible fallback.
 _CKPT_ENV = _os.environ.get("CHECKPOINT_DIR")
 CHECKPOINT_DIR = Path(_CKPT_ENV) if _CKPT_ENV else PACKAGE_ROOT / "checkpoints"
 CHECKPOINT_SEARCH_DIRS: List[Path] = []
 for _path in (
     Path(_CKPT_ENV) if _CKPT_ENV else None,
     PACKAGE_ROOT / "checkpoints",
+    SUBMISSION_ROOT / "data" / "checkpoints",
     SUBMISSION_ROOT / "models",
     PACKAGE_ROOT / "models",
+    Path.cwd() / "data" / "checkpoints",
     Path.cwd() / "models",
 ):
     if _path is None:
@@ -244,7 +247,7 @@ def _find_checkpoint(*names: str) -> Path:
 
     This keeps the package usable both as a standalone code repo
     (checkpoints/ under the package root) and inside the broader
-    submission_final artifact bundle (models/ at the top level).
+    capsule bundle (data/checkpoints/ at the top level).
     """
     direct_candidates = [THIS_DIR / name for name in names]
     for candidate in direct_candidates:

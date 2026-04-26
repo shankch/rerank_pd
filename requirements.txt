@@ -1,0 +1,2 @@
+-r project_code/gap_aware_reranking_floorplanning/requirements.txt
+matplotlib>=3.7
