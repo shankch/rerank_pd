@@ -27,6 +27,3 @@ Third-party components retain their original licenses:
 * The FloorSet dataset and its PyTorch loaders are developed by Intel Labs
   and distributed from https://github.com/IntelLabs/FloorSet. Their licence
   governs use of the dataset itself.
-* The IEEE Access LaTeX class files (paper/ieeeaccess.cls, paper/IEEEtran.cls)
-  are © IEEE and are included solely for reproducibility of the submitted
-  manuscript.
